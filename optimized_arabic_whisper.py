@@ -68,17 +68,12 @@ class AdvancedVAD:
         return zcr
     
     def is_speech(self, audio_chunk):
-        """Determine if audio chunk contains speech using multiple features"""
-        # Normalize audio
-        if np.max(np.abs(audio_chunk)) > 0:
-            audio_chunk = audio_chunk / np.max(np.abs(audio_chunk))
+        """Simple speech detection using only energy"""
+        # Just use volume/energy
+        energy = np.sqrt(np.mean(audio_chunk**2))
         
-        # Calculate features
-        energy = self.calculate_energy(audio_chunk)
-        zcr = self.calculate_zcr(audio_chunk)
-        
-        # Speech detection logic
-        is_speech = (energy > ENERGY_THRESHOLD) and (zcr > ZCR_THRESHOLD)
+        # Lower threshold for better detection
+        is_speech = energy > 0.01
         
         return is_speech, energy
 
@@ -124,21 +119,10 @@ class AudioPreprocessor:
     
     @staticmethod
     def process_audio(audio_data, sample_rate=RATE):
-        """Complete audio preprocessing pipeline"""
-        # Remove DC offset
-        audio_data = AudioPreprocessor.remove_dc_offset(audio_data)
-        
-        # Apply bandpass filter for speech frequencies (80Hz - 8kHz)
-        audio_data = AudioPreprocessor.apply_bandpass_filter(audio_data, sample_rate)
-        
-        # Apply noise gate
-        audio_data = AudioPreprocessor.apply_noise_gate(audio_data, threshold=0.01)
-        
-        # Apply pre-emphasis
-        audio_data = AudioPreprocessor.apply_pre_emphasis(audio_data)
-        
-        # Normalize
-        audio_data = AudioPreprocessor.normalize_audio(audio_data)
+        """Simple normalization only"""
+        # Just normalize - no complex filtering
+        if np.max(np.abs(audio_data)) > 0:
+            audio_data = audio_data / np.max(np.abs(audio_data))
         
         return audio_data
 
