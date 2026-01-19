@@ -11,26 +11,40 @@ import time
 from scipy import signal
 from collections import deque
 
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load .env file
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+    print("⚠ python-dotenv not installed. Using hardcoded API key.")
+
 # OpenAI Whisper API
 try:
     from openai import OpenAI
-    client = OpenAI(api_key="YOUR_OPENAI_API_KEY_HERE")
+    # Try to get API key from environment variable first
+    api_key = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY_HERE")
+    if api_key == "YOUR_OPENAI_API_KEY_HERE":
+        print("⚠ WARNING: Using placeholder API key. Please set OPENAI_API_KEY in .env file")
+    client = OpenAI(api_key=api_key)
     USE_NEW_API = True
 except ImportError:
     import openai
-    openai.api_key = "YOUR_OPENAI_API_KEY_HERE"
+    api_key = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY_HERE")
+    openai.api_key = api_key
     USE_NEW_API = False
 
 # Optimized audio parameters for Arabic speech
-RATE = 16000  # Whisper's optimal sample rate
-CHANNELS = 1
+RATE = int(os.getenv("SAMPLE_RATE", "16000"))  # Whisper's optimal sample rate
+CHANNELS = int(os.getenv("CHANNELS", "1"))
 CHUNK_DURATION = 0.1  # Smaller chunks for better VAD (100ms)
-MIN_SPEECH_DURATION = 1.0  # Minimum 1 second of speech
-MAX_SPEECH_DURATION = 10.0  # Maximum 10 seconds per segment
-SILENCE_DURATION = 0.8  # 800ms of silence to trigger transcription
+MIN_SPEECH_DURATION = float(os.getenv("MIN_SPEECH_DURATION", "1.0"))  # Minimum 1 second of speech
+MAX_SPEECH_DURATION = float(os.getenv("MAX_SPEECH_DURATION", "10.0"))  # Maximum 10 seconds per segment
+SILENCE_DURATION = float(os.getenv("SILENCE_DURATION", "0.8"))  # 800ms of silence to trigger transcription
 
 # Advanced VAD parameters
-ENERGY_THRESHOLD = 0.03  # Energy-based threshold
+ENERGY_THRESHOLD = float(os.getenv("ENERGY_THRESHOLD", "0.03"))  # Energy-based threshold
 ZCR_THRESHOLD = 0.1  # Zero-crossing rate threshold
 MIN_SPEECH_FRAMES = 10  # Minimum frames to consider as speech
 
