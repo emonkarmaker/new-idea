@@ -1,0 +1,9 @@
+# Core Audio Processing
+sounddevice==0.4.6
+numpy==1.24.3
+scipy==1.11.4
+
+# OpenAI Whisper API
+openai>=1.12.0
+
+# GUI (tkinter comes with Python installation)
