@@ -40,8 +40,8 @@ RATE = int(os.getenv("SAMPLE_RATE", "16000"))  # Whisper's optimal sample rate
 CHANNELS = int(os.getenv("CHANNELS", "1"))
 CHUNK_DURATION = 0.1  # Smaller chunks for better VAD (100ms)
 MIN_SPEECH_DURATION = float(os.getenv("MIN_SPEECH_DURATION", "1.0"))  # Minimum 1 second of speech
-MAX_SPEECH_DURATION = float(os.getenv("MAX_SPEECH_DURATION", "10.0"))  # Maximum 10 seconds per segment
-SILENCE_DURATION = float(os.getenv("SILENCE_DURATION", "0.8"))  # 800ms of silence to trigger transcription
+MAX_SPEECH_DURATION = float(os.getenv("MAX_SPEECH_DURATION", "30.0"))  # Maximum 30 seconds per segment
+SILENCE_DURATION = float(os.getenv("SILENCE_DURATION", "5.0"))  # 5 seconds of silence to trigger transcription
 
 # Advanced VAD parameters
 ENERGY_THRESHOLD = float(os.getenv("ENERGY_THRESHOLD", "0.03"))  # Energy-based threshold
@@ -68,12 +68,12 @@ class AdvancedVAD:
         return zcr
     
     def is_speech(self, audio_chunk):
-        """Simple speech detection using only energy"""
-        # Just use volume/energy
+        """Simple speech detection using only energy - ignores background noise"""
+        # Use volume/energy
         energy = np.sqrt(np.mean(audio_chunk**2))
         
-        # Lower threshold for better detection
-        is_speech = energy > 0.01
+        # Higher threshold to ignore background noise, only detect actual speech
+        is_speech = energy > 0.03
         
         return is_speech, energy
 
